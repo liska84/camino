@@ -14,7 +14,7 @@
   <header class="topbar">
     <div class="topbar-title">Camino Português</div>
     <div class="topbar-right">
-      <select id="routeSwitch" class="route-switch" aria-label="Choose route"></select>
+      <select id="routeSwitch" class="route-switch" aria-label="Choose route" hidden></select>
       <button id="authBtn" class="auth-btn">Sign in</button>
     </div>
   </header>
@@ -47,6 +47,8 @@
         <div class="km" id="capKm"></div>
         <div class="hint" id="capHint"></div>
       </div>
+
+      <div class="diag" id="diag" hidden></div>
 
       <div class="progressbar"><i id="progFill"></i></div>
 

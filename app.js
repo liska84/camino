@@ -45,7 +45,9 @@ function refreshEditorStatus(){
   db.collection("config").doc("editors").get().then(function(doc){
     var emails = (doc.exists && doc.data().emails) || [];
     editorsCache = emails;
-    isEditor = emails.indexOf(currentUser.email) !== -1;
+    var mine = (currentUser.email||"").toLowerCase();
+    isEditor = emails.some(function(e){ return String(e||"").toLowerCase() === mine; });
+    if(!isEditor) console.warn("Not an editor. Signed in as:", currentUser.email, "| allowlist:", emails);
     applyEditorUI();
     // The 15 starting stops are only written once — and Firestore's rules
     // require an editor to do it. If nobody has ever signed in yet, this
@@ -143,8 +145,11 @@ function ensureSeedData(){
         addedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
     });
-    batch.commit().catch(function(err){
-      console.warn("Seed skipped (likely not signed in as an editor yet):", err.message);
+    batch.commit().then(function(){
+      showToast("Camino route loaded — "+SEED.towns.length+" stops.");
+    }).catch(function(err){
+      console.warn("Seed failed:", err.message);
+      if(currentUser) showDiag("Could not load the route: "+err.message+" (signed in as "+currentUser.email+")");
     });
   });
 }
@@ -154,11 +159,12 @@ function listenRoutes(){
     routes = {};
     snap.forEach(function(doc){ routes[doc.id] = doc.data(); });
     var ids = Object.keys(routes);
+    routeSwitch.hidden = ids.length < 2;   // nothing to switch between yet
     if(ids.length === 0) return; // seed hasn't landed yet
     routeSwitch.innerHTML = ids.map(function(id){
       return '<option value="'+id+'">'+escapeHtml(routes[id].name)+'</option>';
     }).join("");
-    if(!routes[currentRouteId]) currentRouteId = ids[0];
+    if(!routes[currentRouteId]) switchRoute(ids[0]);
     routeSwitch.value = currentRouteId;
     populateAddRouteSelect();
   }, function(err){ console.error(err); });
@@ -174,7 +180,17 @@ function switchRoute(routeId){
       snap.forEach(function(doc){ towns.push(Object.assign({id:doc.id}, doc.data())); });
       rebuildLegsFromTowns();
       onRouteDataChanged();
-    }, function(err){ console.error(err); });
+      if(towns.length === 0){
+        showDiag('No stops found in route "'+routeId+'". Sign in as an editor to load the Camino, or add a stop.');
+      } else if(towns.length === 1){
+        showDiag('Only 1 stop ("'+towns[0].name+'"). A route needs at least two stops before a line can be drawn.');
+      } else {
+        showDiag("");
+      }
+    }, function(err){
+      console.error(err);
+      showDiag("Could not read stops: "+err.message);
+    });
 }
 
 function rebuildLegsFromTowns(){
@@ -216,6 +232,13 @@ window.__gmapsReady = function(){
     requestRender();
   };
   overlayHelper.setMap(map);
+
+  // Belt and braces: if the projection is slow to arrive, keep nudging a redraw
+  // until it exists, so the route can never be stuck invisible.
+  google.maps.event.addListener(map, "idle", function(){
+    if(!overlayProjection && overlayHelper.getProjection) overlayProjection = overlayHelper.getProjection();
+    requestRender();
+  });
 
   var eb = document.getElementById("exploreBtn");
   if(eb) eb.addEventListener("click", function(){ setExploreMode(!exploreMode); });
@@ -294,7 +317,27 @@ function rebuildOverlayDom(){
   refreshPhotoRings();
 }
 
+function showDiag(msg){
+  var d = document.getElementById("diag");
+  if(!d) return;
+  if(!msg){ d.hidden = true; d.textContent=""; return; }
+  d.hidden = false; d.textContent = msg;
+}
+
+function updateIntroStats(){
+  var box = document.getElementById("introStats");
+  if(!box) return;
+  var known = legs.filter(function(l){ return typeof l.km === "number" && l.km > 0; });
+  var km = known.reduce(function(a,l){ return a + l.km; }, 0);
+  var kmLabel = km ? (known.length < legs.length ? "~" : "") + Math.round(km) : "—";
+  box.innerHTML =
+    '<div class="stat"><b>' + kmLabel + '</b><span>Kilometres</span></div>' +
+    '<div class="stat"><b>' + legs.length + '</b><span>Stages</span></div>' +
+    '<div class="stat"><b>' + towns.length + '</b><span>Stops</span></div>';
+}
+
 function onRouteDataChanged(){
+  updateIntroStats();
   rebuildOverlayDom();
   rebuildScrollFrames();
   requestRender();
@@ -709,7 +752,7 @@ function populateAddRouteSelect(){
 function populateAddAfterSelect(){
   var routeId = addRouteSelect.value || currentRouteId;
   var list = routeId===currentRouteId ? towns : [];
-  addAfterSelect.innerHTML = ['<option value="__end">(am Ende)</option>']
+  addAfterSelect.innerHTML = ['<option value="__end">(at the end)</option>']
     .concat(list.map(function(t){ return '<option value="'+t.id+'">nach '+escapeHtml(t.name)+'</option>'; }))
     .join("");
   addAfterSelect.value = "__end";
