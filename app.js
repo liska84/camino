@@ -65,17 +65,19 @@ authBtn.addEventListener("click", function(){
   } else {
     var provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider).catch(function(err){
-      showToast("Anmeldung fehlgeschlagen: " + (err && err.message || err));
+      showToast("Sign-in failed: " + (err && err.message || err));
     });
   }
 });
 auth.onAuthStateChanged(function(user){
   currentUser = user;
   if(user){
-    authBtn.textContent = user.email;
+    authBtn.textContent = (user.displayName || (user.email||"").split("@")[0] || "Signed in");
+    authBtn.title = "Signed in as " + (user.email||"") + " — click to sign out";
     authBtn.classList.add("signed-in");
   } else {
-    authBtn.textContent = "Anmelden";
+    authBtn.textContent = "Sign in";
+    authBtn.title = "Sign in with Google";
     authBtn.classList.remove("signed-in");
   }
   refreshEditorStatus();
@@ -122,7 +124,7 @@ function ensureSeedData(){
     var batch = db.batch();
     batch.set(routeRef, {
       name: "Camino Português da Costa",
-      description: "Porto → Santiago de Compostela, dem Küstenweg entlang.",
+      description: "Porto → Santiago de Compostela, along the Atlantic coastal way.",
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     SEED.towns.forEach(function(t){
@@ -202,7 +204,7 @@ window.__gmapsReady = function(){
     zoom: 14,
     styles: MAP_STYLE,
     disableDefaultUI: true,
-    gestureHandling: "greedy",
+    gestureHandling: "none",
     backgroundColor: "#efeae0"
   });
 
@@ -214,6 +216,9 @@ window.__gmapsReady = function(){
     requestRender();
   };
   overlayHelper.setMap(map);
+
+  var eb = document.getElementById("exploreBtn");
+  if(eb) eb.addEventListener("click", function(){ setExploreMode(!exploreMode); });
 
   initAutocomplete();
 
@@ -408,8 +413,21 @@ function samplePath(pathLatLng, fraction){
   return out;
 }
 
+var exploreMode = false;
+function setExploreMode(on){
+  exploreMode = !!on;
+  map.setOptions({gestureHandling: exploreMode ? "greedy" : "none"});
+  document.body.classList.toggle("exploring", exploreMode);
+  var b = document.getElementById("exploreBtn");
+  if(b) b.textContent = exploreMode ? "Back to the walk" : "Explore map";
+  if(!exploreMode) requestRender();
+}
+
 function render(){
   if(!map || towns.length===0) return;
+  if(!overlayProjection){ overlaySvg.style.visibility = "hidden"; return; }
+  overlaySvg.style.visibility = "";
+  if(exploreMode) return;
   var rect = wrap.getBoundingClientRect();
   var total = rect.height - window.innerHeight;
   var scrolled = -rect.top;
@@ -467,17 +485,17 @@ function render(){
     var fromT = towns.find(function(x){return x.id===leg.from;});
     var toT = towns.find(function(x){return x.id===leg.to;});
     if(fromT && toT){
-      capDay.textContent = "Etappe "+(li+2)+" / "+(towns.length+1);
+      capDay.textContent = "Stage "+(li+2)+" / "+(towns.length+1);
       capRoute.innerHTML = escapeHtml(fromT.name)+'<span class="arrow">'+(leg.kind==="ferry"?"⛴":"→")+'</span>'+escapeHtml(toT.name);
-      capKm.textContent = leg.kind==="ferry" ? "Bootsüberfahrt" : (leg.km? leg.km+" km" : "");
+      capKm.textContent = leg.kind==="ferry" ? "Ferry crossing" : (leg.km? leg.km+" km" : "");
       var n = photoCount(toT.id);
-      capHint.innerHTML = n ? "<b>"+n+"</b> Foto"+(n>1?"s":"")+" an dieser Station" : "Punkt anklicken für Fotos";
+      capHint.innerHTML = n ? "<b>"+n+"</b> photo"+(n>1?"s":"")+" at this stop" : "Click the point to see photos";
     }
   } else {
-    capDay.textContent = "Tag 1";
+    capDay.textContent = "Day 1";
     capRoute.textContent = towns[0].name;
-    capKm.textContent = "Ankunft am Weg";
-    capHint.textContent = "Scroll, um loszulaufen";
+    capKm.textContent = "The way begins";
+    capHint.textContent = "Scroll to set off";
   }
   topProgress.textContent = String(Math.min(towns.length,(t<=0?1:legIdx+2))).padStart(2,"0")+" / "+String(towns.length).padStart(2,"0");
   progFill.style.width = (overall*100).toFixed(1)+"%";
@@ -542,7 +560,7 @@ function openLightbox(id){
   currentStop = id;
   var t = towns.find(function(x){return x.id===id;});
   if(!t) return;
-  lbDay.textContent = t.order===1 ? "Start" : (t.order===towns.length ? "Ziel" : "Etappe "+t.order);
+  lbDay.textContent = t.order===1 ? "Start" : (t.order===towns.length ? "Finish" : "Stage "+t.order);
   lbTitle.textContent = t.name;
   lbMeta.textContent = t.lat.toFixed(4)+"°N, "+Math.abs(t.lng).toFixed(4)+"°W";
   listenPhotos(id);
@@ -555,7 +573,7 @@ lbClose.addEventListener("click", closeLightbox);
 lbBackdrop.addEventListener("click", function(e){ if(e.target===lbBackdrop) closeLightbox(); });
 
 function renderLightboxGate(){
-  lbNote.textContent = isEditor ? "" : "Zum Hinzufügen von Fotos anmelden — nur eingeladene Personen können bearbeiten.";
+  lbNote.textContent = isEditor ? "" : "Sign in to add photos — only invited people can edit.";
 }
 
 function renderGrid(){
@@ -577,19 +595,19 @@ function openFull(src){ fullImg.src=src; fullBackdrop.classList.add("open"); }
 fullBackdrop.addEventListener("click", function(){ fullBackdrop.classList.remove("open"); fullImg.src=""; });
 
 lbAddBtn.addEventListener("click", function(){
-  if(!isEditor){ showToast("Bitte zuerst anmelden."); return; }
+  if(!isEditor){ showToast("Please sign in first."); return; }
   lbFile.click();
 });
 
 lbFile.addEventListener("change", function(e){
   var files = Array.prototype.slice.call(e.target.files||[]);
   if(!files.length) return;
-  lbStatus.textContent = "Wird hochgeladen…"; lbStatus.classList.remove("err");
+  lbStatus.textContent = "Uploading…"; lbStatus.classList.remove("err");
   Promise.all(files.map(function(f){ return compressImage(f).then(function(blob){ return uploadPhoto(blob); }); }))
-    .then(function(){ lbStatus.textContent = "Gespeichert."; })
+    .then(function(){ lbStatus.textContent = "Saved."; })
     .catch(function(err){
       console.error(err);
-      lbStatus.textContent = "Fehler beim Speichern."; lbStatus.classList.add("err");
+      lbStatus.textContent = "Could not save."; lbStatus.classList.add("err");
     })
     .finally(function(){ lbFile.value=""; });
 });
@@ -636,16 +654,16 @@ function uploadPhoto(blob){
 
 lbDeleteStopBtn.addEventListener("click", function(){
   if(!isEditor || !currentStop) return;
-  if(!confirm("Diese Station wirklich löschen? Fotos bleiben gespeichert, sind aber nicht mehr verknüpft.")) return;
+  if(!confirm("Delete this stop? Photos stay stored but will no longer be linked to it.")) return;
   db.collection("routes").doc(currentRouteId).collection("stops").doc(currentStop).delete()
-    .then(function(){ closeLightbox(); showToast("Station gelöscht."); })
-    .catch(function(err){ showToast("Fehler: "+err.message); });
+    .then(function(){ closeLightbox(); showToast("Stop deleted."); })
+    .catch(function(err){ showToast("Error: "+err.message); });
 });
 
 lbMoveBtn.addEventListener("click", function(){
   if(!isEditor || !currentStop) return;
   var t = towns.find(function(x){return x.id===currentStop;});
-  var input = prompt("Neue Position (1 = Start … "+towns.length+" = Ziel):", t.order);
+  var input = prompt("New position (1 = start … "+towns.length+" = finish):", t.order);
   if(input===null) return;
   var pos = Math.max(1, Math.min(towns.length, parseInt(input,10)||t.order));
   var others = towns.filter(function(x){return x.id!==currentStop;});
@@ -654,7 +672,7 @@ lbMoveBtn.addEventListener("click", function(){
   others.forEach(function(x, i){
     batch.update(db.collection("routes").doc(currentRouteId).collection("stops").doc(x.id), {order:i+1});
   });
-  batch.commit().then(function(){ showToast("Reihenfolge aktualisiert."); }).catch(function(err){ showToast("Fehler: "+err.message); });
+  batch.commit().then(function(){ showToast("Order updated."); }).catch(function(err){ showToast("Error: "+err.message); });
 });
 
 /* ============================================================
@@ -669,7 +687,7 @@ var addStatus = document.getElementById("addStatus");
 var pendingPlace = null;
 
 addStopFab.addEventListener("click", function(){
-  if(!isEditor){ showToast("Bitte zuerst anmelden."); return; }
+  if(!isEditor){ showToast("Please sign in first."); return; }
   pendingPlace = null;
   addConfirmBtn.disabled = true;
   addStatus.textContent = "";
@@ -727,7 +745,7 @@ addConfirmBtn.addEventListener("click", function(){
   if(!pendingPlace || !isEditor) return;
   var routeId = addRouteSelect.value || currentRouteId;
   var afterId = addAfterSelect.value;
-  addStatus.textContent = "Wird gespeichert…";
+  addStatus.textContent = "Saving…";
   var stopsRef = db.collection("routes").doc(routeId).collection("stops");
   stopsRef.orderBy("order").get().then(function(snap){
     var list = []; snap.forEach(function(d){ list.push(Object.assign({id:d.id}, d.data())); });
@@ -749,10 +767,10 @@ addConfirmBtn.addEventListener("click", function(){
       addedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
   }).then(function(){
-    addStatus.textContent = "Station hinzugefügt.";
+    addStatus.textContent = "Stop added.";
     setTimeout(function(){ addBackdrop.classList.remove("open"); }, 700);
   }).catch(function(err){
-    addStatus.textContent = "Fehler: "+err.message;
+    addStatus.textContent = "Error: "+err.message;
   });
 });
 

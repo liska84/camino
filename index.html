@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <title>Camino Português — Porto → Santiago</title>
@@ -14,19 +14,19 @@
   <header class="topbar">
     <div class="topbar-title">Camino Português</div>
     <div class="topbar-right">
-      <select id="routeSwitch" class="route-switch" aria-label="Route wählen"></select>
-      <button id="authBtn" class="auth-btn">Anmelden</button>
+      <select id="routeSwitch" class="route-switch" aria-label="Choose route"></select>
+      <button id="authBtn" class="auth-btn">Sign in</button>
     </div>
   </header>
 
   <section class="intro">
     <div class="eyebrow">Camino Português &middot; Ruta da Costa</div>
     <h1>Porto <em>&rarr;</em> Santiago de Compostela</h1>
-    <p id="introSubtitle">Dem atlantischen Küstenweg entlang, von den Kais von Porto bis vor das Grab des Apostels. Scroll, um dem Weg zu folgen.</p>
+    <p id="introSubtitle">Along the Atlantic coastal way, from the quays of Porto to the tomb of the Apostle. Scroll to follow the route.</p>
     <div class="stats" id="introStats">
-      <div class="stat"><b>~260</b><span>Kilometer</span></div>
-      <div class="stat"><b>14</b><span>Etappen</span></div>
-      <div class="stat"><b>15</b><span>Stationen</span></div>
+      <div class="stat"><b>~260</b><span>Kilometres</span></div>
+      <div class="stat"><b>14</b><span>Stages</span></div>
+      <div class="stat"><b>15</b><span>Stops</span></div>
     </div>
     <div class="scrolldown"><span>Scroll</span><span class="chevron"></span></div>
   </section>
@@ -38,12 +38,11 @@
       <div class="veil"></div>
 
       <div class="topline">
-        <span>Camino Português</span>
         <span id="topProgress">01 / 15</span>
       </div>
 
       <div class="caption" id="caption">
-        <div class="day" id="capDay">Tag 1</div>
+        <div class="day" id="capDay">Day 1</div>
         <div class="route-name" id="capRoute">Porto</div>
         <div class="km" id="capKm"></div>
         <div class="hint" id="capHint"></div>
@@ -51,14 +50,15 @@
 
       <div class="progressbar"><i id="progFill"></i></div>
 
-      <button id="addStopFab" class="fab" hidden title="Station hinzufügen">+ Station</button>
+      <button id="exploreBtn" class="fab fab-ghost" title="Pan and zoom the map freely">Explore map</button>
+      <button id="addStopFab" class="fab" hidden title="Add a stop">+ Stop</button>
     </div>
   </div>
 
   <section class="outro">
     <div class="shell">&#10052;</div>
     <h2>Bem-vinda a Santiago</h2>
-    <p>Klick auf jeden Punkt entlang des Weges, um die Fotos dieser Etappe zu sehen — und, mit Bearbeitungsrechten, eigene hinzuzufügen.</p>
+    <p>Click any point along the way to see the photos from that stage — and, with editing rights, to add your own.</p>
   </section>
 
   <!-- ============ Lightbox: photos per stop ============ -->
@@ -66,18 +66,18 @@
     <div class="lb" id="lbCard">
       <div class="lb-head">
         <div>
-          <div class="day" id="lbDay">Tag 1</div>
+          <div class="day" id="lbDay">Day 1</div>
           <h3 id="lbTitle">Porto</h3>
         </div>
-        <button class="lb-close" id="lbClose" aria-label="Schließen">&#10005;</button>
+        <button class="lb-close" id="lbClose" aria-label="Close">&#10005;</button>
       </div>
       <div class="lb-meta" id="lbMeta"></div>
       <div class="lb-grid" id="lbGrid"></div>
-      <div class="lb-empty" id="lbEmpty" hidden>Noch keine Fotos für diese Etappe.</div>
+      <div class="lb-empty" id="lbEmpty" hidden>No photos for this stage yet.</div>
       <div class="lb-add" id="lbAddRow" hidden>
-        <button class="btn" id="lbAddBtn">+ Foto hinzufügen</button>
-        <button class="btn btn-ghost" id="lbMoveBtn">Station verschieben</button>
-        <button class="btn btn-danger" id="lbDeleteStopBtn">Station löschen</button>
+        <button class="btn" id="lbAddBtn">+ Add photo</button>
+        <button class="btn btn-ghost" id="lbMoveBtn">Move stop</button>
+        <button class="btn btn-danger" id="lbDeleteStopBtn">Delete stop</button>
       </div>
       <div class="lb-note" id="lbNote"></div>
       <div class="lb-status" id="lbStatus"></div>
@@ -93,22 +93,22 @@
   <div class="lb-backdrop" id="addBackdrop">
     <div class="lb" id="addCard">
       <div class="lb-head">
-        <div><h3>Neue Station</h3></div>
-        <button class="lb-close" id="addClose" aria-label="Schließen">&#10005;</button>
+        <div><h3>New stop</h3></div>
+        <button class="lb-close" id="addClose" aria-label="Close">&#10005;</button>
       </div>
-      <p class="lb-meta">Stadt suchen — die Position wird von Google Maps übernommen.</p>
+      <p class="lb-meta">Search for a town — the position comes from Google Maps.</p>
       <div id="addSearchContainer" class="text-input-wrap"></div>
       <div class="add-row">
         <label class="field-label">Route</label>
         <select id="addRouteSelect"></select>
       </div>
       <div class="add-row">
-        <label class="field-label">Einfügen nach</label>
+        <label class="field-label">Insert after</label>
         <select id="addAfterSelect"></select>
       </div>
       <div class="lb-status" id="addStatus"></div>
       <div class="lb-add">
-        <button class="btn" id="addConfirmBtn" disabled>Station hinzufügen</button>
+        <button class="btn" id="addConfirmBtn" disabled>Add stop</button>
       </div>
     </div>
   </div>
