@@ -252,8 +252,11 @@ window.__gmapsReady = function(){
 };
 
 function project(lat,lng){
-  if(!overlayProjection) return {x:0,y:0};
-  var p = overlayProjection.fromLatLngToDivPixel(new google.maps.LatLng(lat,lng));
+  if(!overlayProjection) return null;
+  // Container pixels, NOT div pixels: our SVG covers the map's visible box,
+  // while the overlay pane's origin floats far outside it.
+  var p = overlayProjection.fromLatLngToContainerPixel(new google.maps.LatLng(lat,lng));
+  if(!p || !isFinite(p.x) || !isFinite(p.y)) return null;
   return {x:p.x, y:p.y};
 }
 
@@ -435,7 +438,8 @@ var progFill = document.getElementById("progFill");
 function samplePath(pathLatLng, fraction){
   // pathLatLng: array of [lat,lng]; returns a truncated array up to `fraction` of
   // total on-screen pixel length, using the live projection.
-  var px = pathLatLng.map(function(p){ return project(p[0],p[1]); });
+  var px = pathLatLng.map(function(p){ return project(p[0],p[1]); })
+                     .filter(function(p){ return p !== null; });
   var lens=[0];
   for(var i=1;i<px.length;i++){
     lens.push(lens[i-1] + Math.hypot(px[i].x-px[i-1].x, px[i].y-px[i-1].y));
@@ -510,6 +514,8 @@ function render(){
   towns.forEach(function(town,i){
     var el = stopEls[town.id]; if(!el) return;
     var p = project(town.lat, town.lng);
+    if(!p){ el.g.setAttribute("visibility","hidden"); return; }
+    el.g.setAttribute("visibility","visible");
     el.g.setAttribute("transform","translate("+p.x.toFixed(1)+","+p.y.toFixed(1)+")");
     el.label.setAttribute("x", 11); el.label.setAttribute("y", 4.5);
     var isPulsing = i===reachedIdx;
