@@ -325,6 +325,7 @@ function showDiag(msg){
 }
 
 function onRouteDataChanged(){
+  populateAddAfterSelect();
   if(currentStop && lbBackdrop.classList.contains("open")) refreshEditRow();
   rebuildOverlayDom();
   rebuildScrollFrames();
@@ -761,7 +762,7 @@ lbDeleteStopBtn.addEventListener("click", function(){
    ============================================================ */
 var addBackdrop = document.getElementById("addBackdrop");
 var addClose = document.getElementById("addClose");
-var addAfterSelect = document.getElementById("addAfterSelect");
+var addAfterName = document.getElementById("addAfterName");
 var addConfirmBtn = document.getElementById("addConfirmBtn");
 var addStatus = document.getElementById("addStatus");
 var pendingPlace = null;
@@ -780,12 +781,10 @@ addBackdrop.addEventListener("click", function(e){ if(e.target===addBackdrop) ad
 
 function populateAddRouteSelect(){ /* single fixed route — nothing to choose */ }
 function populateAddAfterSelect(){
-  var routeId = currentRouteId;
-  var list = routeId===currentRouteId ? towns : [];
-  addAfterSelect.innerHTML = ['<option value="__end">(at the end)</option>']
-    .concat(list.map(function(t){ return '<option value="'+t.id+'">nach '+escapeHtml(t.name)+'</option>'; }))
-    .join("");
-  addAfterSelect.value = "__end";
+  // A new stop always continues the way from the last one. If that turns out
+  // to be the wrong place, the stop's own Earlier/Later buttons move it.
+  if(!addAfterName) return;
+  addAfterName.textContent = towns.length ? towns[towns.length-1].name : "the start";
 }
 
 function initAutocomplete(){
@@ -817,19 +816,11 @@ function initAutocomplete(){
 addConfirmBtn.addEventListener("click", function(){
   if(!pendingPlace || !isEditor) return;
   var routeId = currentRouteId;
-  var afterId = addAfterSelect.value;
   addStatus.textContent = "Saving…";
   var stopsRef = db.collection("routes").doc(routeId).collection("stops");
   stopsRef.orderBy("order").get().then(function(snap){
     var list = []; snap.forEach(function(d){ list.push(Object.assign({id:d.id}, d.data())); });
-    var order;
-    if(afterId==="__end" || list.length===0){
-      order = list.length ? list[list.length-1].order+1 : 1;
-    } else {
-      var idx = list.findIndex(function(x){return x.id===afterId;});
-      var prev = list[idx], next = list[idx+1];
-      order = next ? (prev.order+next.order)/2 : prev.order+1;
-    }
+    var order = list.length ? list[list.length-1].order + 1 : 1;
     return stopsRef.add({
       name: pendingPlace.name,
       lat: pendingPlace.lat,
@@ -841,6 +832,8 @@ addConfirmBtn.addEventListener("click", function(){
     });
   }).then(function(){
     addStatus.textContent = "Stop added.";
+    pendingPlace = null;
+    addConfirmBtn.disabled = true;
     setTimeout(function(){ addBackdrop.classList.remove("open"); }, 700);
   }).catch(function(err){
     addStatus.textContent = "Error: "+err.message;
