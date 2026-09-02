@@ -14,7 +14,6 @@
   <header class="topbar">
     <div class="topbar-title">Camino Português</div>
     <div class="topbar-right">
-      <select id="routeSwitch" class="route-switch" aria-label="Choose route" hidden></select>
       <button id="authBtn" class="auth-btn">Sign in</button>
     </div>
   </header>
@@ -22,12 +21,7 @@
   <section class="intro">
     <div class="eyebrow">Camino Português &middot; Ruta da Costa</div>
     <h1>Porto <em>&rarr;</em> Santiago de Compostela</h1>
-    <p id="introSubtitle">Along the Atlantic coastal way, from the quays of Porto to the tomb of the Apostle. Scroll to follow the route.</p>
-    <div class="stats" id="introStats">
-      <div class="stat"><b>~260</b><span>Kilometres</span></div>
-      <div class="stat"><b>14</b><span>Stages</span></div>
-      <div class="stat"><b>15</b><span>Stops</span></div>
-    </div>
+    <p id="introSubtitle">Along the Atlantic coastal way, from the quays of Porto to the tomb of the Apostle. Scroll to follow the way.</p>
     <div class="scrolldown"><span>Scroll</span><span class="chevron"></span></div>
   </section>
 
@@ -38,7 +32,7 @@
       <div class="veil"></div>
 
       <div class="topline">
-        <span id="topProgress">01 / 15</span>
+        <span id="topProgress"></span>
       </div>
 
       <div class="caption" id="caption">
@@ -60,7 +54,7 @@
   <section class="outro">
     <div class="shell">&#10052;</div>
     <h2>Bem-vinda a Santiago</h2>
-    <p>Click any point along the way to see the photos from that stage — and, with editing rights, to add your own.</p>
+    <p>Click any point along the way to see its photos — and, with editing rights, to add your own.</p>
   </section>
 
   <!-- ============ Lightbox: photos per stop ============ -->
@@ -78,8 +72,23 @@
       <div class="lb-empty" id="lbEmpty" hidden>No photos for this stage yet.</div>
       <div class="lb-add" id="lbAddRow" hidden>
         <button class="btn" id="lbAddBtn">+ Add photo</button>
-        <button class="btn btn-ghost" id="lbMoveBtn">Move stop</button>
-        <button class="btn btn-danger" id="lbDeleteStopBtn">Delete stop</button>
+      </div>
+
+      <div class="lb-edit" id="lbEditRow" hidden>
+        <div class="edit-line">
+          <label class="field-label" for="lbNameInput">Name</label>
+          <input type="text" id="lbNameInput" class="edit-input" autocomplete="off">
+          <button class="btn btn-ghost" id="lbRenameBtn">Save</button>
+        </div>
+        <div class="edit-line">
+          <label class="field-label">Position</label>
+          <span class="pos-now" id="lbPosNow">1 of 1</span>
+          <button class="btn btn-ghost" id="lbUpBtn" title="Move one place earlier">&uarr; Earlier</button>
+          <button class="btn btn-ghost" id="lbDownBtn" title="Move one place later">&darr; Later</button>
+        </div>
+        <div class="edit-line">
+          <button class="btn btn-danger" id="lbDeleteStopBtn">Delete this stop</button>
+        </div>
       </div>
       <div class="lb-note" id="lbNote"></div>
       <div class="lb-status" id="lbStatus"></div>
@@ -100,10 +109,6 @@
       </div>
       <p class="lb-meta">Search for a town — the position comes from Google Maps.</p>
       <div id="addSearchContainer" class="text-input-wrap"></div>
-      <div class="add-row">
-        <label class="field-label">Route</label>
-        <select id="addRouteSelect"></select>
-      </div>
       <div class="add-row">
         <label class="field-label">Insert after</label>
         <select id="addAfterSelect"></select>

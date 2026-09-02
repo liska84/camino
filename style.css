@@ -65,14 +65,16 @@ button{font-family:inherit}
   transition:background .2s;
 }
 .auth-btn:hover{background:#fff}
+/* Signed in: read as a name, not a control — matches the title on the left. */
 .auth-btn.signed-in{
-  background:rgba(20,30,32,.62);
+  background:none;border:none;padding:0;
   color:var(--paper);
-  border:1px solid rgba(246,243,234,.45);
-  text-transform:none;letter-spacing:.02em;
-  max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font:600 12px/1 "Work Sans",sans-serif;
+  letter-spacing:.08em;text-transform:uppercase;
+  text-shadow:0 1px 3px rgba(0,0,0,.35);
+  opacity:.92;
 }
-.auth-btn.signed-in:hover{background:rgba(20,30,32,.85)}
+.auth-btn.signed-in:hover{background:none;opacity:1;text-decoration:underline;text-underline-offset:4px}
 
 /* ---------- intro ---------- */
 .intro{
@@ -287,3 +289,16 @@ body.exploring .caption{opacity:0;pointer-events:none}
   padding:16px 18px;border-radius:3px;text-align:center;
   box-shadow:var(--shadow);z-index:12;
 }
+
+/* editor controls for a single stop */
+.lb-edit{border-top:1px solid var(--line);margin-top:16px;padding-top:14px;display:flex;flex-direction:column;gap:10px}
+.edit-line{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.edit-line .field-label{min-width:62px}
+.edit-input{
+  flex:1;min-width:150px;
+  font:500 13.5px/1.3 "Work Sans",sans-serif;
+  padding:9px 10px;border:1px solid var(--line);border-radius:2px;
+  background:#fff;color:var(--ink);
+}
+.pos-now{font:500 13px/1 "Work Sans",sans-serif;color:var(--ink-soft);margin-right:auto}
+.btn[disabled]{opacity:.4;cursor:not-allowed}

@@ -5,7 +5,7 @@
    Editors can add more stops (to this route or new ones) later
    through the page itself — this is just the starting point.
    ============================================================ */
-var SEED = {"towns": [{"id": "porto", "name": "Porto", "lat": 41.1579, "lng": -8.6291, "order": 1}, {"id": "matosinhos", "name": "Matosinhos", "lat": 41.1795, "lng": -8.6871, "order": 2}, {"id": "povoa", "name": "P\u00f3voa de Varzim", "lat": 41.3806, "lng": -8.7638, "order": 3}, {"id": "esposende", "name": "Esposende", "lat": 41.5361, "lng": -8.7811, "order": 4}, {"id": "viana", "name": "Viana do Castelo", "lat": 41.6947, "lng": -8.8323, "order": 5}, {"id": "ancora", "name": "Vila Praia de \u00c2ncora", "lat": 41.8236, "lng": -8.8683, "order": 6}, {"id": "caminha", "name": "Caminha", "lat": 41.8747, "lng": -8.8352, "order": 7}, {"id": "aguarda", "name": "A Guarda", "lat": 41.9022, "lng": -8.8735, "order": 8}, {"id": "baiona", "name": "Baiona", "lat": 42.1167, "lng": -8.85, "order": 9}, {"id": "vigo", "name": "Vigo", "lat": 42.2406, "lng": -8.7207, "order": 10}, {"id": "arcade", "name": "Arcade", "lat": 42.2842, "lng": -8.6167, "order": 11}, {"id": "pontevedra", "name": "Pontevedra", "lat": 42.431, "lng": -8.6444, "order": 12}, {"id": "caldas", "name": "Caldas de Reis", "lat": 42.6022, "lng": -8.6417, "order": 13}, {"id": "padron", "name": "Padr\u00f3n", "lat": 42.7422, "lng": -8.6564, "order": 14}, {"id": "santiago", "name": "Santiago de Compostela", "lat": 42.8805, "lng": -8.5456, "order": 15}], "legs": [{"from": "porto", "to": "matosinhos", "kind": "coastal", "km": 2, "path": [[41.1579, -8.6291], [41.159491, -8.68578], [41.1795, -8.6871]]}, {"from": "matosinhos", "to": "povoa", "kind": "coastal", "km": 27, "path": [[41.1795, -8.6871], [41.221503, -8.718373], [41.249661, -8.737172], [41.262926, -8.732289], [41.274075, -8.734609], [41.28498, -8.740061], [41.297431, -8.744618], [41.328111, -8.744456], [41.337795, -8.749135], [41.34054, -8.756132], [41.350898, -8.760325], [41.361314, -8.764027], [41.3806, -8.7638]]}, {"from": "povoa", "to": "esposende", "kind": "coastal", "km": 22, "path": [[41.3806, -8.7638], [41.393866, -8.783803], [41.406109, -8.783773], [41.434878, -8.785564], [41.468338, -8.774849], [41.491067, -8.78647], [41.511798, -8.78826], [41.5361, -8.7811]]}, {"from": "esposende", "to": "viana", "kind": "coastal", "km": 24, "path": [[41.5361, -8.7811], [41.542553, -8.79542], [41.572943, -8.808339], [41.595404, -8.812856], [41.611884, -8.819488], [41.630097, -8.820449], [41.648157, -8.828603], [41.671586, -8.830511], [41.682807, -8.827056], [41.689276, -8.804677], [41.696967, -8.743276], [41.703111, -8.725942], [41.711859, -8.710032], [41.721991, -8.696156], [41.696967, -8.806874], [41.6947, -8.8323]]}, {"from": "viana", "to": "ancora", "kind": "coastal", "km": 19, "path": [[41.6947, -8.8323], [41.695787, -8.842885], [41.704368, -8.861113], [41.736862, -8.880306], [41.765533, -8.880317], [41.8236, -8.8683]]}, {"from": "ancora", "to": "caminha", "kind": "coastal", "km": 10, "path": [[41.8236, -8.8683], [41.839016, -8.878896], [41.849555, -8.874745], [41.859117, -8.867502], [41.903306, -8.79662], [41.931952, -8.762766], [41.96898, -8.750803], [41.952582, -8.761952], [41.937161, -8.777089], [41.925686, -8.7954], [41.92121, -8.815989], [41.913967, -8.832834], [41.8747, -8.8352]]}, {"from": "caminha", "to": "aguarda", "kind": "ferry", "km": 1.5, "path": [[41.8747, -8.8352], [41.9022, -8.8735]]}, {"from": "aguarda", "to": "baiona", "kind": "coastal", "km": 30, "path": [[41.9022, -8.8735], [42.101752, -8.89859], [42.119086, -8.895497], [42.126044, -8.884592], [42.1167, -8.85]]}, {"from": "baiona", "to": "vigo", "kind": "coastal", "km": 26, "path": [[42.1167, -8.85], [42.13052, -8.826527], [42.139716, -8.819081], [42.14761, -8.82372], [42.154446, -8.842763], [42.160834, -8.846995], [42.164293, -8.84203], [42.174506, -8.815989], [42.178697, -8.813466], [42.188137, -8.811025], [42.197496, -8.805776], [42.201728, -8.795237], [42.204535, -8.790639], [42.222235, -8.771962], [42.2406, -8.7207]]}, {"from": "vigo", "to": "arcade", "kind": "coastal", "km": 22, "path": [[42.2406, -8.7207], [42.256415, -8.706451], [42.258531, -8.701894], [42.280911, -8.669911], [42.286322, -8.652008], [42.2842, -8.6167]]}, {"from": "arcade", "to": "pontevedra", "kind": "coastal", "km": 11, "path": [[42.2842, -8.6167], [42.301947, -8.625152], [42.310207, -8.621653], [42.340806, -8.621653], [42.34748, -8.622711], [42.348334, -8.626454], [42.346381, -8.634755], [42.335598, -8.649892], [42.316799, -8.660756], [42.299018, -8.674794], [42.291164, -8.699574], [42.287584, -8.719838], [42.268988, -8.773915], [42.260077, -8.784983], [42.258246, -8.795766], [42.260972, -8.848297], [42.256415, -8.867502], [42.268988, -8.863637], [42.291083, -8.853424], [42.304836, -8.853261], [42.304836, -8.846995], [42.28913, -8.832997], [42.296698, -8.827219], [42.329047, -8.826527], [42.337226, -8.828521], [42.34162, -8.830719], [42.344143, -8.82726], [42.346381, -8.812856], [42.340155, -8.776926], [42.342719, -8.771962], [42.355699, -8.764638], [42.388739, -8.726877], [42.400377, -8.709828], [42.416449, -8.676869], [42.426907, -8.662506], [42.431, -8.6444]]}, {"from": "pontevedra", "to": "caldas", "kind": "inland", "km": 24, "path": [[42.431, -8.6444], [42.43382995605468, -8.643343627929687], [42.4373271484375, -8.642033398437498], [42.44140881347656, -8.640501391601562], [42.445992187499996, -8.6387796875], [42.45099450683593, -8.636900366210938], [42.456333007812496, -8.6348955078125], [42.46192492675781, -8.632797192382812], [42.4676875, -8.630637499999999], [42.47353796386719, -8.628448510742189], [42.4793935546875, -8.6262623046875], [42.48517150878906, -8.624110961914063], [42.4907890625, -8.622026562500002], [42.496163452148444, -8.620041186523439], [42.501211914062495, -8.618186914062502], [42.50585168457032, -8.616495825195317], [42.51, -8.615], [42.51374230957031, -8.61356317138672], [42.5172369140625, -8.61204833984375], [42.520510327148436, -8.610486486816406], [42.52358906250001, -8.608908593750002], [42.526499633789065, -8.607345642089845], [42.5292685546875, -8.605828613281252], [42.53192233886718, -8.604388488769532], [42.5344875, -8.60305625], [42.53699055175781, -8.601862878417966], [42.5394580078125, -8.600839355468748], [42.54191638183595, -8.600016662597655], [42.54439218750001, -8.599425781249998], [42.54691193847657, -8.599097692871092], [42.54950214843751, -8.599063378906248], [42.5521893310547, -8.599353820800781], [42.555, -8.6], [42.55797600097656, -8.60112529296875], [42.5611173828125, -8.602784374999999], [42.56438796386718, -8.604905175781251], [42.5677515625, -8.607415625], [42.571171997070316, -8.61024365234375], [42.5746130859375, -8.613317187499998], [42.578038647460936, -8.61656416015625], [42.581412500000006, -8.6199125], [42.58469846191406, -8.623290136718749], [42.5878603515625, -8.626624999999999], [42.59086198730469, -8.629845019531249], [42.5936671875, -8.632878124999998], [42.596239770507815, -8.635652246093748], [42.5985435546875, -8.638095312499997], [42.60054235839844, -8.640135253906248], [42.6022, -8.6417]]}, {"from": "caldas", "to": "padron", "kind": "inland", "km": 18, "path": [[42.6022, -8.6417], [42.60388891601563, -8.641066040039062], [42.605941015625, -8.6402291015625], [42.608315576171876, -8.639220971679688], [42.610971875000004, -8.638073437500001], [42.613869189453126, -8.636818286132813], [42.616966796875005, -8.635487304687501], [42.620223974609374, -8.634112280273436], [42.623599999999996, -8.632724999999999], [42.62705415039062, -8.631357250976563], [42.630545703124994, -8.630040820312498], [42.63403393554687, -8.628807495117188], [42.637478125, -8.6276890625], [42.640837548828124, -8.626717309570312], [42.644071484375, -8.625924023437502], [42.64713920898436, -8.625340991210939], [42.65, -8.625], [42.65269189453125, -8.624870788574219], [42.65528984375, -8.62489443359375], [42.65780849609375, -8.625059729003905], [42.6602625, -8.62535546875], [42.66266650390625, -8.625770446777343], [42.66503515625, -8.626293457031249], [42.667383105468744, -8.626913293457031], [42.669725, -8.62761875], [42.672075488281244, -8.62839862060547], [42.67444921875, -8.629241699218749], [42.67686083984375, -8.630136779785156], [42.67932499999999, -8.63107265625], [42.68185634765624, -8.632038122558592], [42.684469531249995, -8.63302197265625], [42.68717919921875, -8.63401300048828], [42.69, -8.635], [42.69302299804688, -8.63606357421875], [42.696298046875, -8.637275781249999], [42.69977797851562, -8.63861259765625], [42.703415625, -8.64005], [42.707163818359376, -8.64156396484375], [42.710975390625, -8.64313046875], [42.71480317382812, -8.64472548828125], [42.718599999999995, -8.646325], [42.72231870117187, -8.64790498046875], [42.725912109374995, -8.64944140625], [42.72933305664063, -8.65091025390625], [42.732534375, -8.6522875], [42.73546889648437, -8.65354912109375], [42.738089453125, -8.654671093749998], [42.74034887695313, -8.655629394531251], [42.7422, -8.6564]]}, {"from": "padron", "to": "santiago", "kind": "inland", "km": 24, "path": [[42.7422, -8.6564], [42.74386145019531, -8.653868530273437], [42.7458384765625, -8.650779492187498], [42.74810134277343, -8.647197192382812], [42.7506203125, -8.6431859375], [42.75336564941406, -8.63881003417969], [42.7563076171875, -8.6341337890625], [42.75941647949218, -8.629221508789062], [42.76266249999999, -8.6241375], [42.76601594238281, -8.618946069335939], [42.769447070312495, -8.613711523437502], [42.772926147460936, -8.608498168945314], [42.7764234375, -8.603370312500003], [42.77990920410156, -8.59839226074219], [42.7833537109375, -8.593628320312503], [42.78672722167969, -8.589142797851565], [42.79, -8.585], [42.79327545166015, -8.580982788085938], [42.79666376953125, -8.576857617187502], [42.80014539794922, -8.572664184570312], [42.803700781249994, -8.5684421875], [42.807310363769524, -8.564231323242186], [42.810954589843746, -8.5600712890625], [42.8146139038086, -8.556001782226563], [42.81826875, -8.5520625], [42.82189957275391, -8.548293139648438], [42.82548681640625, -8.5447333984375], [42.82901092529298, -8.541422973632812], [42.832452343750006, -8.5384015625], [42.83579151611328, -8.53570886230469], [42.83900888671875, -8.5333845703125], [42.84208489990235, -8.531468383789063], [42.845, -8.53], [42.8478193359375, -8.52906447753906], [42.85061328125, -8.5286783203125], [42.8533701171875, -8.528778393554688], [42.856078125, -8.5293015625], [42.8587255859375, -8.530184692382813], [42.861300781249994, -8.5313646484375], [42.863791992187494, -8.532778295898437], [42.8661875, -8.5343625], [42.8684755859375, -8.536054125976563], [42.87064453125, -8.537790039062498], [42.8726826171875, -8.539507104492186], [42.874578125000006, -8.5411421875], [42.8763193359375, -8.542632153320312], [42.87789453125, -8.543913867187499], [42.879291992187504, -8.544924194335936], [42.8805, -8.5456]]}]};
+var SEED = { towns: [ {id:"porto", name:"Porto", lat:41.1579, lng:-8.6291, order:1} ], legs: [] };
 
 var MAP_STYLE = [
   {elementType:"geometry", stylers:[{color:"#efeae0"}]},
@@ -89,6 +89,7 @@ var addStopFab = document.getElementById("addStopFab");
 function applyEditorUI(){
   addStopFab.hidden = !isEditor;
   document.getElementById("lbAddRow").hidden = !isEditor;
+  if(typeof refreshEditRow === "function") refreshEditRow();
   renderLightboxGate();
 }
 
@@ -114,58 +115,37 @@ var towns = [];           // ordered stop docs of the current route
 var legs = [];            // computed from towns (+ seed path geometry when available)
 var stopUnsub = null;
 
-var routeSwitch = document.getElementById("routeSwitch");
-routeSwitch.addEventListener("change", function(){
-  switchRoute(routeSwitch.value);
-});
-
 function ensureSeedData(){
+  if(!isEditor) return;
   var routeRef = db.collection("routes").doc(ROUTE_ID_DEFAULT);
-  routeRef.get().then(function(doc){
-    if(doc.exists) return; // already seeded
-    var batch = db.batch();
-    batch.set(routeRef, {
-      name: "Camino Português da Costa",
-      description: "Porto → Santiago de Compostela, along the Atlantic coastal way.",
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  var portoRef = routeRef.collection("stops").doc("porto");
+  // Idempotent: makes sure the route exists and Porto is stop #1,
+  // without disturbing anything else already there.
+  routeRef.set({
+    name: "Camino Português da Costa",
+    description: "Built up stop by stop from Porto."
+  }, {merge:true}).then(function(){
+    return portoRef.get();
+  }).then(function(doc){
+    if(doc.exists) return null;
+    var p = SEED.towns[0];
+    return portoRef.set({
+      name: p.name, lat: p.lat, lng: p.lng, order: p.order,
+      km: null, kind: "start", pathIn: null, pathFromId: null,
+      addedBy: "start", addedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
-    SEED.towns.forEach(function(t){
-      var stopRef = routeRef.collection("stops").doc(t.id);
-      var legOut = SEED.legs.find(function(l){ return l.to === t.id; });
-      batch.set(stopRef, {
-        name: t.name,
-        lat: t.lat,
-        lng: t.lng,
-        order: t.order,
-        km: legOut ? legOut.km : null,
-        kind: legOut ? legOut.kind : null,
-        pathIn: legOut ? legOut.path : null,
-        pathFromId: legOut ? legOut.from : null,
-        addedBy: "seed",
-        addedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    });
-    batch.commit().then(function(){
-      showToast("Camino route loaded — "+SEED.towns.length+" stops.");
-    }).catch(function(err){
-      console.warn("Seed failed:", err.message);
-      if(currentUser) showDiag("Could not load the route: "+err.message+" (signed in as "+currentUser.email+")");
-    });
+  }).then(function(res){
+    if(res !== null) showToast("Porto is on the map. Add your next stop.");
+  }).catch(function(err){
+    console.warn("Start setup failed:", err.message);
+    showDiag("Could not set up Porto: "+err.message);
   });
 }
 
 function listenRoutes(){
-  db.collection("routes").onSnapshot(function(snap){
-    routes = {};
-    snap.forEach(function(doc){ routes[doc.id] = doc.data(); });
-    var ids = Object.keys(routes);
-    routeSwitch.hidden = ids.length < 2;   // nothing to switch between yet
-    if(ids.length === 0) return; // seed hasn't landed yet
-    routeSwitch.innerHTML = ids.map(function(id){
-      return '<option value="'+id+'">'+escapeHtml(routes[id].name)+'</option>';
-    }).join("");
-    if(!routes[currentRouteId]) switchRoute(ids[0]);
-    routeSwitch.value = currentRouteId;
+  // Single fixed route for now — nothing to list or switch between.
+  db.collection("routes").doc(ROUTE_ID_DEFAULT).onSnapshot(function(doc){
+    routes = {}; if(doc.exists) routes[doc.id] = doc.data();
     populateAddRouteSelect();
   }, function(err){ console.error(err); });
 }
@@ -181,9 +161,9 @@ function switchRoute(routeId){
       rebuildLegsFromTowns();
       onRouteDataChanged();
       if(towns.length === 0){
-        showDiag('No stops found in route "'+routeId+'". Sign in as an editor to load the Camino, or add a stop.');
+        showDiag(isEditor ? "Setting up Porto…" : "No stops yet.");
       } else if(towns.length === 1){
-        showDiag('Only 1 stop ("'+towns[0].name+'"). A route needs at least two stops before a line can be drawn.');
+        showDiag("");
       } else {
         showDiag("");
       }
@@ -191,6 +171,21 @@ function switchRoute(routeId){
       console.error(err);
       showDiag("Could not read stops: "+err.message);
     });
+}
+
+// Firestore has no nested arrays, so polylines live as [{lat,lng},...].
+// Accept either shape on read so old and new documents both work.
+function decodePath(v){
+  if(!Array.isArray(v) || v.length===0) return null;
+  if(Array.isArray(v[0])) return v;
+  if(typeof v[0]==="object" && v[0] && "lat" in v[0]){
+    return v.map(function(p){ return [p.lat, p.lng]; });
+  }
+  return null;
+}
+function encodePath(pairs){
+  if(!Array.isArray(pairs)) return null;
+  return pairs.map(function(p){ return {lat:p[0], lng:p[1]}; });
 }
 
 function rebuildLegsFromTowns(){
@@ -202,8 +197,9 @@ function rebuildLegsFromTowns(){
   legs = [];
   for(var i=0;i<towns.length-1;i++){
     var a = towns[i], b = towns[i+1];
-    var curated = b.pathIn && b.pathIn.length>1 && b.pathFromId === a.id;
-    var path = curated ? b.pathIn : [[a.lat,a.lng],[b.lat,b.lng]];
+    var stored = decodePath(b.pathIn);
+    var curated = stored && stored.length>1 && b.pathFromId === a.id;
+    var path = curated ? stored : [[a.lat,a.lng],[b.lat,b.lng]];
     legs.push({ from:a.id, to:b.id, kind: b.kind || "coastal", km: curated ? b.km : null, path: path });
   }
 }
@@ -212,33 +208,19 @@ function rebuildLegsFromTowns(){
    Google Maps
    ============================================================ */
 var map, overlaySvg = document.getElementById("overlay");
-var overlayProjection = null;
 
 window.__gmapsReady = function(){
   map = new google.maps.Map(document.getElementById("map"), {
     center: {lat:41.1579, lng:-8.6291},
-    zoom: 14,
+    zoom: 13,
     styles: MAP_STYLE,
     disableDefaultUI: true,
     gestureHandling: "none",
     backgroundColor: "#efeae0"
   });
 
-  var overlayHelper = new google.maps.OverlayView();
-  overlayHelper.onAdd = function(){};
-  overlayHelper.onRemove = function(){};
-  overlayHelper.draw = function(){
-    overlayProjection = overlayHelper.getProjection();
-    requestRender();
-  };
-  overlayHelper.setMap(map);
-
-  // Belt and braces: if the projection is slow to arrive, keep nudging a redraw
-  // until it exists, so the route can never be stuck invisible.
-  google.maps.event.addListener(map, "idle", function(){
-    if(!overlayProjection && overlayHelper.getProjection) overlayProjection = overlayHelper.getProjection();
-    requestRender();
-  });
+  google.maps.event.addListener(map, "idle", requestRender);
+  google.maps.event.addListener(map, "bounds_changed", requestRender);
 
   var eb = document.getElementById("exploreBtn");
   if(eb) eb.addEventListener("click", function(){ setExploreMode(!exploreMode); });
@@ -251,13 +233,28 @@ window.__gmapsReady = function(){
   requestRender();
 };
 
+/* Web-Mercator projection done by hand from the map's own centre and zoom.
+   The SVG covers exactly the map's visible box, so screen position is
+   world-pixel offset from centre. No OverlayView, no waiting for a draw
+   callback that may never fire. */
 function project(lat,lng){
-  if(!overlayProjection) return null;
-  // Container pixels, NOT div pixels: our SVG covers the map's visible box,
-  // while the overlay pane's origin floats far outside it.
-  var p = overlayProjection.fromLatLngToContainerPixel(new google.maps.LatLng(lat,lng));
-  if(!p || !isFinite(p.x) || !isFinite(p.y)) return null;
-  return {x:p.x, y:p.y};
+  if(!map) return null;
+  var c = map.getCenter(); if(!c) return null;
+  var z = map.getZoom(); if(typeof z !== "number") return null;
+  var el = document.getElementById("map");
+  var w = el.clientWidth, h = el.clientHeight;
+  if(!w || !h) return null;
+  var scale = 256 * Math.pow(2, z);
+  function wx(lo){ return (lo + 180) / 360 * scale; }
+  function wy(la){
+    var s = Math.sin(la * Math.PI / 180);
+    s = Math.max(-0.9999, Math.min(0.9999, s));
+    return (0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * scale;
+  }
+  var x = wx(lng) - wx(c.lng()) + w / 2;
+  var y = wy(lat) - wy(c.lat()) + h / 2;
+  if(!isFinite(x) || !isFinite(y)) return null;
+  return {x:x, y:y};
 }
 
 /* ============================================================
@@ -327,20 +324,8 @@ function showDiag(msg){
   d.hidden = false; d.textContent = msg;
 }
 
-function updateIntroStats(){
-  var box = document.getElementById("introStats");
-  if(!box) return;
-  var known = legs.filter(function(l){ return typeof l.km === "number" && l.km > 0; });
-  var km = known.reduce(function(a,l){ return a + l.km; }, 0);
-  var kmLabel = km ? (known.length < legs.length ? "~" : "") + Math.round(km) : "—";
-  box.innerHTML =
-    '<div class="stat"><b>' + kmLabel + '</b><span>Kilometres</span></div>' +
-    '<div class="stat"><b>' + legs.length + '</b><span>Stages</span></div>' +
-    '<div class="stat"><b>' + towns.length + '</b><span>Stops</span></div>';
-}
-
 function onRouteDataChanged(){
-  updateIntroStats();
+  if(currentStop && lbBackdrop.classList.contains("open")) refreshEditRow();
   rebuildOverlayDom();
   rebuildScrollFrames();
   requestRender();
@@ -472,8 +457,6 @@ function setExploreMode(on){
 
 function render(){
   if(!map || towns.length===0) return;
-  if(!overlayProjection){ overlaySvg.style.visibility = "hidden"; return; }
-  overlaySvg.style.visibility = "";
   if(exploreMode) return;
   var rect = wrap.getBoundingClientRect();
   var total = rect.height - window.innerHeight;
@@ -534,17 +517,17 @@ function render(){
     var fromT = towns.find(function(x){return x.id===leg.from;});
     var toT = towns.find(function(x){return x.id===leg.to;});
     if(fromT && toT){
-      capDay.textContent = "Stage "+(li+2)+" / "+(towns.length+1);
+      capDay.textContent = "Stop "+(li+2)+" of "+towns.length;
       capRoute.innerHTML = escapeHtml(fromT.name)+'<span class="arrow">'+(leg.kind==="ferry"?"⛴":"→")+'</span>'+escapeHtml(toT.name);
       capKm.textContent = leg.kind==="ferry" ? "Ferry crossing" : (leg.km? leg.km+" km" : "");
       var n = photoCount(toT.id);
       capHint.innerHTML = n ? "<b>"+n+"</b> photo"+(n>1?"s":"")+" at this stop" : "Click the point to see photos";
     }
   } else {
-    capDay.textContent = "Day 1";
+    capDay.textContent = "Start";
     capRoute.textContent = towns[0].name;
     capKm.textContent = "The way begins";
-    capHint.textContent = "Scroll to set off";
+    capHint.textContent = towns.length > 1 ? "Scroll to set off" : "Add a stop to begin the way";
   }
   topProgress.textContent = String(Math.min(towns.length,(t<=0?1:legIdx+2))).padStart(2,"0")+" / "+String(towns.length).padStart(2,"0");
   progFill.style.width = (overall*100).toFixed(1)+"%";
@@ -597,8 +580,64 @@ var lbMeta = document.getElementById("lbMeta");
 var lbGrid = document.getElementById("lbGrid");
 var lbEmpty = document.getElementById("lbEmpty");
 var lbAddBtn = document.getElementById("lbAddBtn");
-var lbMoveBtn = document.getElementById("lbMoveBtn");
 var lbDeleteStopBtn = document.getElementById("lbDeleteStopBtn");
+var lbEditRow = document.getElementById("lbEditRow");
+var lbNameInput = document.getElementById("lbNameInput");
+var lbRenameBtn = document.getElementById("lbRenameBtn");
+var lbPosNow = document.getElementById("lbPosNow");
+var lbUpBtn = document.getElementById("lbUpBtn");
+var lbDownBtn = document.getElementById("lbDownBtn");
+
+function stopRef(id){
+  return db.collection("routes").doc(currentRouteId).collection("stops").doc(id);
+}
+
+function refreshEditRow(){
+  lbEditRow.hidden = !isEditor || !currentStop;
+  if(lbEditRow.hidden) return;
+  var i = towns.findIndex(function(x){ return x.id === currentStop; });
+  if(i < 0) return;
+  lbNameInput.value = towns[i].name || "";
+  lbPosNow.textContent = (i+1) + " of " + towns.length;
+  lbUpBtn.disabled = (i === 0);
+  lbDownBtn.disabled = (i === towns.length - 1);
+}
+
+// Rewrite every stop's order as 1..n in the given sequence, so positions
+// can never drift apart or collide however many moves happen.
+function commitOrder(list){
+  var batch = db.batch();
+  list.forEach(function(x, i){ batch.update(stopRef(x.id), {order: i+1}); });
+  return batch.commit();
+}
+
+function moveStop(delta){
+  if(!isEditor || !currentStop) return;
+  var i = towns.findIndex(function(x){ return x.id === currentStop; });
+  var j = i + delta;
+  if(i < 0 || j < 0 || j >= towns.length) return;
+  var list = towns.slice();
+  var moved = list.splice(i, 1)[0];
+  list.splice(j, 0, moved);
+  commitOrder(list)
+    .then(function(){ showToast("Moved to position " + (j+1) + "."); })
+    .catch(function(err){ showToast("Error: " + err.message); });
+}
+
+lbUpBtn.addEventListener("click", function(){ moveStop(-1); });
+lbDownBtn.addEventListener("click", function(){ moveStop(1); });
+
+lbRenameBtn.addEventListener("click", function(){
+  if(!isEditor || !currentStop) return;
+  var name = lbNameInput.value.trim();
+  if(!name){ showToast("A stop needs a name."); return; }
+  stopRef(currentStop).update({name: name})
+    .then(function(){ lbTitle.textContent = name; showToast("Renamed."); })
+    .catch(function(err){ showToast("Error: " + err.message); });
+});
+lbNameInput.addEventListener("keydown", function(e){
+  if(e.key === "Enter"){ e.preventDefault(); lbRenameBtn.click(); }
+});
 var lbNote = document.getElementById("lbNote");
 var lbStatus = document.getElementById("lbStatus");
 var lbFile = document.getElementById("lbFile");
@@ -609,9 +648,10 @@ function openLightbox(id){
   currentStop = id;
   var t = towns.find(function(x){return x.id===id;});
   if(!t) return;
-  lbDay.textContent = t.order===1 ? "Start" : (t.order===towns.length ? "Finish" : "Stage "+t.order);
+  lbDay.textContent = t.order===1 ? "Start" : (t.order===towns.length ? "Latest" : "Stop "+t.order);
   lbTitle.textContent = t.name;
   lbMeta.textContent = t.lat.toFixed(4)+"°N, "+Math.abs(t.lng).toFixed(4)+"°W";
+  refreshEditRow();
   listenPhotos(id);
   renderGrid();
   lbStatus.textContent = "";
@@ -704,32 +744,23 @@ function uploadPhoto(blob){
 lbDeleteStopBtn.addEventListener("click", function(){
   if(!isEditor || !currentStop) return;
   if(!confirm("Delete this stop? Photos stay stored but will no longer be linked to it.")) return;
-  db.collection("routes").doc(currentRouteId).collection("stops").doc(currentStop).delete()
-    .then(function(){ closeLightbox(); showToast("Stop deleted."); })
+  var gone = currentStop;
+  stopRef(gone).delete()
+    .then(function(){
+      closeLightbox();
+      showToast("Stop deleted.");
+      // close the gap so positions stay 1..n
+      return commitOrder(towns.filter(function(x){ return x.id !== gone; }));
+    })
     .catch(function(err){ showToast("Error: "+err.message); });
 });
 
-lbMoveBtn.addEventListener("click", function(){
-  if(!isEditor || !currentStop) return;
-  var t = towns.find(function(x){return x.id===currentStop;});
-  var input = prompt("New position (1 = start … "+towns.length+" = finish):", t.order);
-  if(input===null) return;
-  var pos = Math.max(1, Math.min(towns.length, parseInt(input,10)||t.order));
-  var others = towns.filter(function(x){return x.id!==currentStop;});
-  others.splice(pos-1, 0, t);
-  var batch = db.batch();
-  others.forEach(function(x, i){
-    batch.update(db.collection("routes").doc(currentRouteId).collection("stops").doc(x.id), {order:i+1});
-  });
-  batch.commit().then(function(){ showToast("Order updated."); }).catch(function(err){ showToast("Error: "+err.message); });
-});
 
 /* ============================================================
    Add-stop panel (Places Autocomplete)
    ============================================================ */
 var addBackdrop = document.getElementById("addBackdrop");
 var addClose = document.getElementById("addClose");
-var addRouteSelect = document.getElementById("addRouteSelect");
 var addAfterSelect = document.getElementById("addAfterSelect");
 var addConfirmBtn = document.getElementById("addConfirmBtn");
 var addStatus = document.getElementById("addStatus");
@@ -746,17 +777,10 @@ addStopFab.addEventListener("click", function(){
 });
 addClose.addEventListener("click", function(){ addBackdrop.classList.remove("open"); });
 addBackdrop.addEventListener("click", function(e){ if(e.target===addBackdrop) addBackdrop.classList.remove("open"); });
-addRouteSelect.addEventListener("change", populateAddAfterSelect);
 
-function populateAddRouteSelect(){
-  var ids = Object.keys(routes);
-  addRouteSelect.innerHTML = ids.map(function(id){
-    return '<option value="'+id+'">'+escapeHtml(routes[id].name)+'</option>';
-  }).join("");
-  addRouteSelect.value = currentRouteId;
-}
+function populateAddRouteSelect(){ /* single fixed route — nothing to choose */ }
 function populateAddAfterSelect(){
-  var routeId = addRouteSelect.value || currentRouteId;
+  var routeId = currentRouteId;
   var list = routeId===currentRouteId ? towns : [];
   addAfterSelect.innerHTML = ['<option value="__end">(at the end)</option>']
     .concat(list.map(function(t){ return '<option value="'+t.id+'">nach '+escapeHtml(t.name)+'</option>'; }))
@@ -792,7 +816,7 @@ function initAutocomplete(){
 
 addConfirmBtn.addEventListener("click", function(){
   if(!pendingPlace || !isEditor) return;
-  var routeId = addRouteSelect.value || currentRouteId;
+  var routeId = currentRouteId;
   var afterId = addAfterSelect.value;
   addStatus.textContent = "Saving…";
   var stopsRef = db.collection("routes").doc(routeId).collection("stops");
