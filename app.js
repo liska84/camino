@@ -453,21 +453,24 @@ function setExploreMode(on){
   document.body.classList.toggle("exploring", exploreMode);
   var b = document.getElementById("exploreBtn");
   if(b) b.textContent = exploreMode ? "Back to the walk" : "Explore map";
-  if(!exploreMode) requestRender();
+  requestRender();
 }
 
 function render(){
   if(!map || towns.length===0) return;
-  if(exploreMode) return;
   var rect = wrap.getBoundingClientRect();
   var total = rect.height - window.innerHeight;
   var scrolled = -rect.top;
   var overall = total>0 ? Math.max(0,Math.min(1, scrolled/total)) : 0;
   var t = overall*totalT;
 
-  var state = boxAt(t);
-  map.setCenter({lat:state.lat, lng:state.lng});
-  map.setZoom(state.zoom);
+  // In explore mode the person drives the camera; we only keep the drawing
+  // glued to whatever they pan or zoom to.
+  if(!exploreMode){
+    var state = boxAt(t);
+    map.setCenter({lat:state.lat, lng:state.lng});
+    map.setZoom(state.zoom);
+  }
 
   var legIdx = Math.min(legs.length-1, Math.floor(Math.max(0,t)));
   var legProgress = Math.max(0, Math.min(1, t-legIdx));
@@ -534,12 +537,22 @@ function render(){
   progFill.style.width = (overall*100).toFixed(1)+"%";
 }
 
-var renderTicking = false;
+var renderHandle = 0;
 function requestRender(){
-  if(renderTicking) return;
-  renderTicking = true;
-  requestAnimationFrame(function(){ render(); renderTicking=false; });
+  if(renderHandle) return;
+  renderHandle = requestAnimationFrame(function(){
+    renderHandle = 0;              // cleared FIRST, so a throw can never jam the loop
+    try { render(); }
+    catch(err){ console.error("render failed:", err); }
+  });
 }
+
+// requestAnimationFrame is paused while a tab is in the background, so a
+// frame asked for there never arrives. Clear the pending handle on return,
+// otherwise the page stays frozen for the rest of its life.
+document.addEventListener("visibilitychange", function(){
+  if(!document.hidden){ renderHandle = 0; requestRender(); }
+});
 window.addEventListener("scroll", requestRender, {passive:true});
 window.addEventListener("resize", function(){ rebuildScrollFrames(); requestRender(); });
 
