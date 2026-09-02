@@ -207,7 +207,7 @@ function rebuildLegsFromTowns(){
 /* ============================================================
    Google Maps
    ============================================================ */
-var map, overlaySvg = document.getElementById("overlay");
+var map;
 
 window.__gmapsReady = function(){
   map = new google.maps.Map(document.getElementById("map"), {
@@ -237,85 +237,182 @@ window.__gmapsReady = function(){
    The SVG covers exactly the map's visible box, so screen position is
    world-pixel offset from centre. No OverlayView, no waiting for a draw
    callback that may never fire. */
-function project(lat,lng){
-  if(!map) return null;
-  var c = map.getCenter(); if(!c) return null;
-  var z = map.getZoom(); if(typeof z !== "number") return null;
-  var el = document.getElementById("map");
-  var w = el.clientWidth, h = el.clientHeight;
-  if(!w || !h) return null;
-  var scale = 256 * Math.pow(2, z);
-  function wx(lo){ return (lo + 180) / 360 * scale; }
-  function wy(la){
-    var s = Math.sin(la * Math.PI / 180);
-    s = Math.max(-0.9999, Math.min(0.9999, s));
-    return (0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * scale;
-  }
-  var x = wx(lng) - wx(c.lng()) + w / 2;
-  var y = wy(lat) - wy(c.lat()) + h / 2;
-  if(!isFinite(x) || !isFinite(y)) return null;
-  return {x:x, y:y};
-}
 
 /* ============================================================
    Overlay SVG: route lines + stop markers, redrawn every frame
    from the current map projection.
    ============================================================ */
-var legEls = [];   // {refPath (DOM, invisible), visPath, ferryIcon, kind, from, to}
-var stopEls = {};  // id -> group el
+/* Everything drawn on the map is now a real Google Maps object — Markers and
+   Polylines anchored to latitude/longitude. Google keeps them glued to the
+   ground through every pan, zoom and animation, so nothing can drift. */
+
+var stopMarkers = {};   // stopId -> {dot, halo}
+var legLines = [];      // {leg, line, style}
+var pulseTimer = null, pulsePhase = 0, pulsingId = null;
+
+var COL_ROUTE = "#C8932F", COL_FERRY = "#33484E",
+    COL_PULSE = "#D3562A", COL_DONE = "#33484E", COL_CARD = "#F6F3EA";
+
+function circleIcon(scale, fill, stroke, weight, opacity){
+  return {
+    path: google.maps.SymbolPath.CIRCLE,
+    scale: scale,
+    fillColor: fill,
+    fillOpacity: opacity == null ? 1 : opacity,
+    strokeColor: stroke || COL_CARD,
+    strokeWeight: weight == null ? 1.6 : weight,
+    strokeOpacity: opacity == null ? 1 : opacity
+  };
+}
+
+function clearDrawing(){
+  Object.keys(stopMarkers).forEach(function(id){
+    stopMarkers[id].dot.setMap(null);
+    stopMarkers[id].halo.setMap(null);
+  });
+  stopMarkers = {};
+  legLines.forEach(function(l){ l.line.setMap(null); });
+  legLines = [];
+}
 
 function rebuildOverlayDom(){
-  overlaySvg.innerHTML = "";
-  legEls = [];
-  stopEls = {};
+  if(!map) return;
+  clearDrawing();
 
   legs.forEach(function(leg){
-    var ref = document.createElementNS("http://www.w3.org/2000/svg","path");
-    ref.style.display = "none";
-    overlaySvg.appendChild(ref);
-
-    var vis = document.createElementNS("http://www.w3.org/2000/svg","path");
-    vis.setAttribute("class","leg-path"+(leg.kind==="ferry"?" ferry":""));
-    overlaySvg.appendChild(vis);
-
-    var ferryIcon = null;
-    if(leg.kind === "ferry"){
-      ferryIcon = document.createElementNS("http://www.w3.org/2000/svg","text");
-      ferryIcon.setAttribute("class","ferry-icon");
-      ferryIcon.textContent = "⛴";
-      overlaySvg.appendChild(ferryIcon);
-    }
-    legEls.push({leg:leg, ref:ref, vis:vis, ferryIcon:ferryIcon});
+    legLines.push({
+      leg: leg,
+      style: null,
+      line: new google.maps.Polyline({
+        map: map, path: [], clickable: false, zIndex: 2,
+        strokeColor: leg.kind === "ferry" ? COL_FERRY : COL_ROUTE,
+        strokeOpacity: 0, strokeWeight: 3.4
+      })
+    });
   });
 
   towns.forEach(function(t){
-    var g = document.createElementNS("http://www.w3.org/2000/svg","g");
-    g.setAttribute("class","stop");
-
-    var ringPhoto = document.createElementNS("http://www.w3.org/2000/svg","circle");
-    ringPhoto.setAttribute("class","ring-photo"); ringPhoto.setAttribute("r","9.4");
-    g.appendChild(ringPhoto);
-
-    var halo = document.createElementNS("http://www.w3.org/2000/svg","circle");
-    halo.setAttribute("class","halo"); halo.setAttribute("r","5.4");
-    g.appendChild(halo);
-
-    var dot = document.createElementNS("http://www.w3.org/2000/svg","circle");
-    dot.setAttribute("class","dot"); dot.setAttribute("r","5.4");
-    g.appendChild(dot);
-
-    var label = document.createElementNS("http://www.w3.org/2000/svg","text");
-    label.setAttribute("class","label");
-    label.textContent = t.name;
-    g.appendChild(label);
-
-    g.addEventListener("click", function(){ openLightbox(t.id); });
-    overlaySvg.appendChild(g);
-    stopEls[t.id] = {g:g, ringPhoto:ringPhoto, halo:halo, dot:dot, label:label};
+    var pos = {lat: t.lat, lng: t.lng};
+    var halo = new google.maps.Marker({
+      map: map, position: pos, clickable: false, zIndex: 3,
+      icon: circleIcon(5.4, COL_PULSE, COL_PULSE, 0, 0)
+    });
+    var dot = new google.maps.Marker({
+      map: map, position: pos, zIndex: 4, title: t.name,
+      icon: circleIcon(5.4, COL_PULSE),
+      label: {text: t.name, className: "stop-label",
+              color: "#26312F", fontFamily: "Work Sans, sans-serif",
+              fontSize: "12px", fontWeight: "600"}
+    });
+    dot.addListener("click", function(){ openLightbox(t.id); });
+    stopMarkers[t.id] = {dot: dot, halo: halo};
   });
 
+  startPulse();
   refreshPhotoRings();
 }
+
+// The halo of the stop you have just reached breathes outward.
+function startPulse(){
+  if(pulseTimer) return;
+  pulseTimer = setInterval(function(){
+    pulsePhase = (pulsePhase + 0.03) % 1;
+    var m = pulsingId && stopMarkers[pulsingId];
+    if(!m) return;
+    m.halo.setIcon(circleIcon(5.4 + pulsePhase * 15, COL_PULSE, COL_PULSE, 0,
+                              0.6 * (1 - pulsePhase)));
+  }, 50);
+}
+
+function setPulsing(id){
+  if(pulsingId === id) return;
+  if(pulsingId && stopMarkers[pulsingId]){
+    stopMarkers[pulsingId].halo.setIcon(circleIcon(5.4, COL_PULSE, COL_PULSE, 0, 0));
+  }
+  pulsingId = id;
+  pulsePhase = 0;
+}
+
+function refreshPhotoRings(){
+  towns.forEach(function(t){
+    var m = stopMarkers[t.id]; if(!m) return;
+    m.dot.setOptions({title: t.name + (photoCount(t.id) ? " — photos" : "")});
+  });
+}
+
+/* ---------- real walking routes, fetched once and stored ---------- */
+
+var dirService = null, routingBusy = false;
+
+function fillMissingWalkingPaths(){
+  if(!isEditor || routingBusy || !map || !window.google) return;
+  for(var i = 0; i < towns.length - 1; i++){
+    var a = towns[i], b = towns[i+1];
+    if(decodePath(b.pathIn) && b.pathFromId === a.id) continue;   // already have it
+    routingBusy = true;
+    if(!dirService) dirService = new google.maps.DirectionsService();
+    (function(a, b){
+      dirService.route({
+        origin: {lat: a.lat, lng: a.lng},
+        destination: {lat: b.lat, lng: b.lng},
+        travelMode: google.maps.TravelMode.WALKING
+      }, function(res, status){
+        routingBusy = false;
+        if(status !== "OK" || !res || !res.routes || !res.routes[0]){
+          console.warn("Walking route " + a.name + " to " + b.name + ": " + status);
+          showDiag("No walking route from " + a.name + " to " + b.name + " (" + status + ").");
+          return;
+        }
+        var pts = res.routes[0].overview_path.map(function(pt){ return [pt.lat(), pt.lng()]; });
+        var metres = res.routes[0].legs.reduce(function(sum, l){ return sum + l.distance.value; }, 0);
+        stopRef(b.id).update({
+          pathIn: encodePath(pts),
+          pathFromId: a.id,
+          km: Math.round(metres / 100) / 10
+        }).catch(function(e){ console.warn("Could not store walking route:", e.message); });
+      });
+    })(a, b);
+    return;   // one at a time; saving re-triggers this for the next gap
+  }
+}
+
+/* Reveal a fraction of a leg by real ground distance. */
+function haversine(a, b){
+  var R = 6371000, toRad = Math.PI / 180;
+  var dLat = (b[0]-a[0]) * toRad, dLng = (b[1]-a[1]) * toRad;
+  var s = Math.sin(dLat/2)*Math.sin(dLat/2) +
+          Math.cos(a[0]*toRad)*Math.cos(b[0]*toRad)*Math.sin(dLng/2)*Math.sin(dLng/2);
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(s)));
+}
+
+function slicePath(path, frac){
+  if(!path || path.length < 2) return [];
+  if(frac >= 1) return path.map(function(p){ return {lat:p[0], lng:p[1]}; });
+  var segs = [], total = 0;
+  for(var i = 0; i < path.length - 1; i++){
+    var d = haversine(path[i], path[i+1]);
+    segs.push(d); total += d;
+  }
+  if(total <= 0) return [];
+  var want = total * frac, run = 0;
+  var out = [{lat: path[0][0], lng: path[0][1]}];
+  for(var k = 0; k < segs.length; k++){
+    if(run + segs[k] >= want){
+      var f = segs[k] > 0 ? (want - run) / segs[k] : 0;
+      out.push({
+        lat: path[k][0] + (path[k+1][0] - path[k][0]) * f,
+        lng: path[k][1] + (path[k+1][1] - path[k][1]) * f
+      });
+      break;
+    }
+    run += segs[k];
+    out.push({lat: path[k+1][0], lng: path[k+1][1]});
+  }
+  return out;
+}
+
+var DASH = [{icon:{path:"M 0,-1 0,1", strokeOpacity:1, strokeWeight:3.4, scale:2.4},
+             offset:"0", repeat:"13px"}];
 
 function showDiag(msg){
   var d = document.getElementById("diag");
@@ -325,6 +422,7 @@ function showDiag(msg){
 }
 
 function onRouteDataChanged(){
+  fillMissingWalkingPaths();
   populateAddAfterSelect();
   if(currentStop && lbBackdrop.classList.contains("open")) refreshEditRow();
   rebuildOverlayDom();
@@ -356,7 +454,7 @@ function rebuildScrollFrames(){
     var b = towns.find(function(x){return x.id===leg.to;});
     if(!a || !b) return;
     var mid = {lat:(a.lat+b.lat)/2, lng:(a.lng+b.lng)/2};
-    var travel = {lat:mid.lat, lng:mid.lng, bounds:[a,b], pad:0.6};
+    var travel = {lat:mid.lat, lng:mid.lng, bounds:[a,b], pad:0.25};
     frames.push({t:i+0.12, box: travel});
     frames.push({t:i+0.85, box: travel});
     frames.push({t:i+1.0, box: restFrame(b)});
@@ -394,7 +492,7 @@ function stateAt(box){
     return {lat:box.lat, lng:box.lng, zoom:z};
   }
   // rest frame: fit a fixed pad (meters-ish, approximated in degrees) around a point
-  var padDeg = 0.028;
+  var padDeg = 0.018;
   var z = zoomForBounds(box.lat-padDeg, box.lng-padDeg, box.lat+padDeg, box.lng+padDeg, window.innerWidth, window.innerHeight);
   return {lat:box.lat, lng:box.lng, zoom:z};
 }
@@ -421,30 +519,6 @@ var capHint = document.getElementById("capHint");
 var topProgress = document.getElementById("topProgress");
 var progFill = document.getElementById("progFill");
 
-function samplePath(pathLatLng, fraction){
-  // pathLatLng: array of [lat,lng]; returns a truncated array up to `fraction` of
-  // total on-screen pixel length, using the live projection.
-  var px = pathLatLng.map(function(p){ return project(p[0],p[1]); })
-                     .filter(function(p){ return p !== null; });
-  var lens=[0];
-  for(var i=1;i<px.length;i++){
-    lens.push(lens[i-1] + Math.hypot(px[i].x-px[i-1].x, px[i].y-px[i-1].y));
-  }
-  var total = lens[lens.length-1];
-  var target = total*fraction;
-  if(target<=0) return [];
-  var out=[px[0]];
-  for(var i=1;i<px.length;i++){
-    if(lens[i] <= target){ out.push(px[i]); }
-    else {
-      var segLen = lens[i]-lens[i-1];
-      var f = segLen>0 ? (target-lens[i-1])/segLen : 0;
-      out.push({x: lerp(px[i-1].x,px[i].x,f), y: lerp(px[i-1].y,px[i].y,f)});
-      break;
-    }
-  }
-  return out;
-}
 
 var exploreMode = false;
 function setExploreMode(on){
@@ -476,41 +550,36 @@ function render(){
   var legProgress = Math.max(0, Math.min(1, t-legIdx));
   if(t<=0){ legIdx=0; legProgress=0; }
 
-  legEls.forEach(function(le, i){
+  legLines.forEach(function(ll, i){
     var p = i<legIdx ? 1 : (i===legIdx ? legProgress : 0);
-    if(p<=0){
-      le.vis.setAttribute("d","");
-      le.vis.classList.remove("dashing","solid");
-      if(le.ferryIcon) le.ferryIcon.classList.remove("show");
-      return;
-    }
-    var pts = samplePath(le.leg.path, p);
-    if(pts.length<2){ le.vis.setAttribute("d",""); return; }
-    var d = "M "+pts.map(function(pt){return pt.x.toFixed(1)+","+pt.y.toFixed(1);}).join(" L ");
-    le.vis.setAttribute("d", d);
-    if(p>=0.999){ le.vis.classList.add("solid"); le.vis.classList.remove("dashing"); }
-    else { le.vis.classList.add("dashing"); le.vis.classList.remove("solid"); }
-    if(le.ferryIcon){
-      le.ferryIcon.classList.toggle("show", p>0.15);
-      var mid = pts[Math.floor(pts.length/2)];
-      le.ferryIcon.setAttribute("x", mid.x); le.ferryIcon.setAttribute("y", mid.y-10);
+    if(p<=0){ ll.line.setPath([]); return; }
+    ll.line.setPath(slicePath(ll.leg.path, p));
+    var want = p>=0.999 ? "solid" : "dash";
+    if(ll.style !== want){
+      ll.style = want;
+      ll.line.setOptions(want === "solid"
+        ? {strokeOpacity:1, icons:null}
+        : {strokeOpacity:0, icons:DASH});
     }
   });
 
   var reachedIdx = t<=0 ? 0 : (legProgress>=0.999 ? legIdx+1 : legIdx);
   towns.forEach(function(town,i){
-    var el = stopEls[town.id]; if(!el) return;
-    var p = project(town.lat, town.lng);
-    if(!p){ el.g.setAttribute("visibility","hidden"); return; }
-    el.g.setAttribute("visibility","visible");
-    el.g.setAttribute("transform","translate("+p.x.toFixed(1)+","+p.y.toFixed(1)+")");
-    el.label.setAttribute("x", 11); el.label.setAttribute("y", 4.5);
+    var m = stopMarkers[town.id]; if(!m) return;
     var isPulsing = i===reachedIdx;
     var isReached = i<=reachedIdx;
-    el.g.classList.toggle("pulsing", isPulsing);
-    el.g.classList.toggle("reached", isReached && !isPulsing);
+    if(isPulsing) setPulsing(town.id);
+    m.dot.setIcon(circleIcon(isPulsing ? 6.2 : 5.0,
+                             isPulsing ? COL_PULSE : (isReached ? COL_DONE : "#A9AEA6")));
     var toNext = legIdx<towns.length-1 && town.id===legs[legIdx].to && legProgress>0.05;
-    el.g.classList.toggle("labeled", isReached || isPulsing || toNext);
+    var showLabel = isReached || isPulsing || toNext;
+    var lab = m.dot.getLabel() || {};
+    if(!!lab.text !== showLabel){
+      m.dot.setLabel(showLabel
+        ? {text: town.name, className:"stop-label", color:"#26312F",
+           fontFamily:"Work Sans, sans-serif", fontSize:"12px", fontWeight:"600"}
+        : null);
+    }
   });
 
   var showCaption = t>0.02;
@@ -563,12 +632,6 @@ var photoCache = {}; // stopId -> [{id, url, addedBy}]
 var photoListeners = {};
 
 function photoCount(stopId){ return (photoCache[stopId]||[]).length; }
-function refreshPhotoRings(){
-  towns.forEach(function(t){
-    var el = stopEls[t.id]; if(!el) return;
-    el.g.classList.toggle("has-photos", photoCount(t.id)>0);
-  });
-}
 
 function listenPhotos(stopId){
   if(photoListeners[stopId]) return;

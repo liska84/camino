@@ -152,32 +152,10 @@ button{font-family:inherit}
 }
 .fab:hover{transform:translateY(-1px)}
 
-/* svg overlay markers */
-.leg-path{fill:none;stroke:var(--route);stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round}
-.leg-path.ferry{stroke:var(--sea-deep);stroke-width:2.4}
-.leg-path.dashing{stroke-dasharray:8 7}
-.leg-path.solid{stroke-dasharray:none}
-.ferry-icon{font-size:16px;text-anchor:middle;dominant-baseline:middle;opacity:0;transition:opacity .4s ease;
-  filter:drop-shadow(0 1px 2px rgba(0,0,0,.4));}
-.ferry-icon.show{opacity:1}
-.stop circle.halo{fill:none;stroke:var(--pulse);stroke-width:2;opacity:0;transform-origin:center;transform-box:fill-box}
-.stop.pulsing circle.halo{animation:pulse 2.1s ease-out infinite}
-@keyframes pulse{0%{opacity:.65;transform:scale(1)}100%{opacity:0;transform:scale(3.4)}}
-.stop circle.dot{fill:var(--pulse);stroke:var(--card);stroke-width:1.6;transition:fill .3s ease}
-.stop.reached circle.dot{fill:var(--sea-deep)}
-.stop.pulsing circle.dot{fill:var(--pulse)}
-.stop .ring-photo{fill:none;stroke:var(--card);stroke-width:1;opacity:0}
-.stop.has-photos .ring-photo{opacity:.9}
-.stop text.label{
-  font:500 12.5px/1 "Fraunces",serif;fill:var(--paper);opacity:0;transition:opacity .35s ease;
-  text-shadow:0 1px 4px rgba(0,0,0,.55), 0 0 12px rgba(0,0,0,.35);
-}
-.stop.labeled text.label{opacity:1}
-.stop{pointer-events:auto;cursor:pointer}
-
-@media (prefers-reduced-motion:reduce){
-  .stop.pulsing circle.halo{animation:none;opacity:.35}
-  .scrolldown .chevron{animation:none}
+/* labels drawn by Google on each stop marker */
+.stop-label{
+  text-shadow:0 0 3px var(--paper),0 0 3px var(--paper),0 0 6px var(--paper);
+  transform:translateX(52px);
 }
 
 /* ---------- outro ---------- */
