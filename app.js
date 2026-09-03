@@ -53,7 +53,10 @@ function refreshEditorStatus(){
     // require an editor to do it. If nobody has ever signed in yet, this
     // is what actually plants that first data (harmless once it exists:
     // ensureSeedData() checks first and does nothing if the route is already there).
-    if(isEditor) ensureSeedData();
+    if(isEditor){
+      ensureSeedData();
+      fillMissingWalkingPaths();   // sign-in is often the moment this first becomes possible
+    }
   }).catch(function(){
     isEditor = false;
     applyEditorUI();
