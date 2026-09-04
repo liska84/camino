@@ -530,8 +530,11 @@ function setExploreMode(on){
   document.body.classList.toggle("exploring", exploreMode);
   var b = document.getElementById("exploreBtn");
   if(b) b.textContent = exploreMode ? "Back to the walk" : "Explore map";
+  if(!exploreMode){ lastZoom = null; lastCentre = null; }
   requestRender();
 }
+
+var lastZoom = null, lastCentre = null;
 
 function render(){
   if(!map || towns.length===0) return;
@@ -545,8 +548,18 @@ function render(){
   // glued to whatever they pan or zoom to.
   if(!exploreMode){
     var state = boxAt(t);
-    map.setCenter({lat:state.lat, lng:state.lng});
-    map.setZoom(state.zoom);
+    // Google renders a fractional zoom by stretching tiles from the level below,
+    // which is why the map went huge and blurry. Only ever ask for whole levels,
+    // and only when the level actually changes — re-asking every frame makes it
+    // refetch tiles faster than it can paint them.
+    var z = Math.round(state.zoom);
+    if(lastZoom !== z){ lastZoom = z; map.setZoom(z); }
+    if(!lastCentre ||
+       Math.abs(lastCentre.lat - state.lat) > 1e-6 ||
+       Math.abs(lastCentre.lng - state.lng) > 1e-6){
+      lastCentre = {lat: state.lat, lng: state.lng};
+      map.setCenter(lastCentre);
+    }
   }
 
   var legIdx = Math.min(legs.length-1, Math.floor(Math.max(0,t)));
