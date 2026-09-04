@@ -222,8 +222,11 @@ window.__gmapsReady = function(){
     backgroundColor: "#efeae0"
   });
 
-  google.maps.event.addListener(map, "idle", requestRender);
-  google.maps.event.addListener(map, "bounds_changed", requestRender);
+  applyLayoutHeight();
+  // Deliberately NO map-movement listeners here. render() moves the camera, so
+  // redrawing on movement feeds itself: move -> redraw -> move -> redraw, and
+  // the map never settles long enough to finish painting its tiles. Markers and
+  // polylines are Google's own objects, so they follow the map without our help.
 
   var eb = document.getElementById("exploreBtn");
   if(eb) eb.addEventListener("click", function(){ setExploreMode(!exploreMode); });
@@ -340,7 +343,9 @@ function refreshPhotoRings(){
   towns.forEach(function(t){
     var m = stopMarkers[t.id]; if(!m) return;
     m.dot.setOptions({title: t.name + (photoCount(t.id) ? " — photos" : "")});
+    listenPhotos(t.id);   // so the ring can appear without opening the stop first
   });
+  requestRender();
 }
 
 /* ---------- real walking routes, fetched once and stored ---------- */
@@ -439,7 +444,17 @@ function onRouteDataChanged(){
 var wrap = document.getElementById("stageWrap");
 var VH_PER_LEG = 1.35;
 function layoutHeight(){ return Math.round(window.innerHeight * (VH_PER_LEG * Math.max(1,legs.length) + 1)); }
-function applyLayoutHeight(){ wrap.style.height = layoutHeight()+"px"; }
+var stageEl = document.getElementById("stage");
+function applyLayoutHeight(){
+  // The stage was sized in CSS with svh while the scroll maths uses the window
+  // height. When those two disagree the map box and the page disagree too,
+  // which is what left blank bands. Size it from the same number.
+  if(stageEl) stageEl.style.height = window.innerHeight + "px";
+  wrap.style.height = layoutHeight()+"px";
+  if(window.google && window.google.maps && map){
+    google.maps.event.trigger(map, "resize");   // tell Google its box changed
+  }
+}
 window.addEventListener("resize", function(){ applyLayoutHeight(); rebuildScrollFrames(); });
 
 var frames = [];
@@ -585,8 +600,12 @@ function render(){
     var isPulsing = i===reachedIdx;
     var isReached = i<=reachedIdx;
     if(isPulsing) setPulsing(town.id);
-    m.dot.setIcon(circleIcon(isPulsing ? 6.2 : 5.0,
-                             isPulsing ? COL_PULSE : (isReached ? COL_DONE : "#A9AEA6")));
+    var hasPhotos = photoCount(town.id) > 0;
+    m.dot.setIcon(circleIcon(
+      isPulsing ? 6.4 : 5.2,
+      isPulsing ? COL_PULSE : (isReached ? COL_DONE : "#A9AEA6"),
+      hasPhotos ? "#FFFFFF" : COL_CARD,
+      hasPhotos ? 3.4 : 1.6));
     var toNext = legIdx<towns.length-1 && town.id===legs[legIdx].to && legProgress>0.05;
     var showLabel = isReached || isPulsing || toNext;
     var lab = m.dot.getLabel() || {};
@@ -686,10 +705,11 @@ function stopRef(id){
 }
 
 function refreshEditRow(){
-  lbEditRow.hidden = !isEditor || !currentStop;
+  var i = currentStop ? towns.findIndex(function(x){ return x.id === currentStop; }) : -1;
+  // Never show these controls half-filled: if we cannot find the stop, the
+  // numbers and the name would be stale defaults, which is worse than nothing.
+  lbEditRow.hidden = !isEditor || i < 0;
   if(lbEditRow.hidden) return;
-  var i = towns.findIndex(function(x){ return x.id === currentStop; });
-  if(i < 0) return;
   lbNameInput.value = towns[i].name || "";
   lbPosNow.textContent = (i+1) + " of " + towns.length;
   lbUpBtn.disabled = (i === 0);
@@ -755,7 +775,10 @@ lbClose.addEventListener("click", closeLightbox);
 lbBackdrop.addEventListener("click", function(e){ if(e.target===lbBackdrop) closeLightbox(); });
 
 function renderLightboxGate(){
+  // Only ever say "sign in" when the editing controls are genuinely absent,
+  // so the panel cannot contradict itself.
   lbNote.textContent = isEditor ? "" : "Sign in to add photos — only invited people can edit.";
+  lbNote.hidden = isEditor;
 }
 
 function renderGrid(){
