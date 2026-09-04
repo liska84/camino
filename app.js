@@ -7,6 +7,9 @@
    ============================================================ */
 var SEED = { towns: [ {id:"porto", name:"Porto", lat:41.1579, lng:-8.6291, order:1} ], legs: [] };
 
+// Flip to true for the muted parchment styling, false for stock Google Maps.
+var USE_CUSTOM_STYLE = false;
+
 var MAP_STYLE = [
   {elementType:"geometry", stylers:[{color:"#efeae0"}]},
   {elementType:"labels.icon", stylers:[{visibility:"off"}]},
@@ -216,7 +219,7 @@ window.__gmapsReady = function(){
   map = new google.maps.Map(document.getElementById("map"), {
     center: {lat:41.1579, lng:-8.6291},
     zoom: 13,
-    styles: MAP_STYLE,
+    styles: USE_CUSTOM_STYLE ? MAP_STYLE : null,
     disableDefaultUI: true,
     gestureHandling: "none",
     backgroundColor: "#efeae0"
